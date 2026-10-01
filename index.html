@@ -93,7 +93,7 @@ button:focus-visible,input:focus-visible+span,summary:focus-visible{outline:2px 
 h1{margin:4px 0 0;font-size:clamp(36px,7vw,50px);font-weight:800;letter-spacing:.04em;line-height:1.05;text-wrap:balance}
 h2{margin:0;font-size:22px;font-weight:800;letter-spacing:.03em}
 .lede{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
-.sports{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sports{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .sport{display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(17,26,44,.7);border:1px solid var(--line);border-radius:8px;padding:12px 6px 10px}
 .sport[aria-pressed="true"]{background:var(--panel-2);border-color:var(--accent)}
 .sport .n{font-size:16px;font-weight:700}
@@ -103,6 +103,7 @@ h2{margin:0;font-size:22px;font-weight:800;letter-spacing:.03em}
 .ico.tennis::before,.ico.tennis::after{content:"";position:absolute;width:26px;height:26px;border:2px solid #f6ffd6;border-radius:50%;top:2px}
 .ico.tennis::before{left:-18px}.ico.tennis::after{right:-18px}
 .ico.pingpong{border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffd2a0,#ff9a3a 60%,#d9721c)}
+.ico.athletics{border-radius:6px;background:repeating-linear-gradient(90deg,#b4503a 0 5px,#f4f4f0 5px 6px)}
 .ico.badminton::before{content:"";position:absolute;left:4px;top:0;width:22px;height:21px;background:#f2f4f8;clip-path:polygon(0 0,100% 0,62% 100%,38% 100%)}
 .ico.badminton::after{content:"";position:absolute;left:9px;bottom:0;width:12px;height:12px;border-radius:50%;background:#d8c7a8}
 .opts{display:flex;flex-direction:column;gap:10px}
@@ -197,6 +198,27 @@ table.stand{width:100%;border-collapse:collapse;font-size:14px}
   .overlay{background:linear-gradient(0deg,rgba(10,16,29,.97) 0%,rgba(10,16,29,.9) 70%,rgba(10,16,29,.25) 100%)}
   .sheet{margin-left:0;margin-top:auto;margin-bottom:0}
 }
+/* athletics HUD */
+#athBoard{position:fixed;left:12px;top:calc(env(safe-area-inset-top,0px) + 12px);background:rgba(10,16,29,.86);border:1px solid var(--line);border-radius:6px;min-width:220px;max-width:min(330px,56vw);font-size:13px;overflow:hidden}
+#athTitle{padding:5px 10px;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.06em;color:var(--accent);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.br{display:grid;grid-template-columns:16px minmax(0,1fr) auto;gap:8px;padding:2px 10px;color:var(--muted)}
+.br .bn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.br .bm2{font-family:var(--f-num),var(--f-body);font-variant-numeric:tabular-nums;font-size:14px;text-align:right}
+.br.me .bn,.br.me .bm2{color:var(--you);font-weight:700}
+#athMeters{position:fixed;left:50%;transform:translateX(-50%);width:max-content;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;gap:16px;flex-wrap:wrap;justify-content:center;background:rgba(10,16,29,.84);border:1px solid var(--line);border-radius:8px;padding:8px 14px;max-width:calc(100vw - 32px);pointer-events:none}
+.touch #athMeters{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 12px);left:auto;right:12px;transform:none;max-width:min(420px,46vw);margin-top:52px}
+.meter{display:flex;flex-direction:column;gap:3px;min-width:96px;font-size:12px;color:var(--muted)}
+.meter.wide{min-width:220px}
+.meter i{display:block;height:8px;border-radius:4px;background:var(--panel-2);position:relative;overflow:visible}
+.meter i b{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent)}
+.meter i b.low{background:var(--low)}
+.meter i b.zone{background:#4fd18b}
+.meter i u{position:absolute;top:-3px;bottom:-3px;width:3px;margin-left:-1px;background:#fff;border-radius:2px}
+.meter i.tbar{height:14px}
+.meter em{font-style:normal;font-family:var(--f-num),var(--f-body);font-size:18px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+#hud.athmode #hint{bottom:calc(env(safe-area-inset-bottom,0px) + 96px)}
+#athBig{position:fixed;left:50%;top:15%;transform:translateX(-50%);font-size:clamp(28px,6vw,52px);font-weight:800;letter-spacing:.06em;text-shadow:0 2px 18px rgba(0,0,0,.6);pointer-events:none;white-space:nowrap}
+#overTable{width:100%;max-height:40vh;overflow-y:auto;text-align:left}
 @media (prefers-reduced-motion:reduce){#toast,#shot,.sw span,.sw span::after,.stams i b{transition:none}}
 </style>
 
@@ -214,6 +236,7 @@ table.stand{width:100%;border-collapse:collapse;font-size:14px}
   <div id="toast"></div>
   <div id="shot"></div>
   <div id="hint"></div>
+  <div id="athHud" hidden><div id="athBoard"><div id="athTitle"></div><div id="athRows"></div></div><div id="athMeters"></div><div id="athBig"></div></div>
   <div id="touch">
     <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
     <div id="btns"><button id="btnB" type="button" aria-label="巧打">巧</button><button id="btnA" type="button" aria-label="进攻">攻</button></div>
@@ -225,19 +248,21 @@ table.stand{width:100%;border-collapse:collapse;font-size:14px}
     <div>
       <div class="eyebrow">Racket Trio</div>
       <h1>挥拍三项</h1>
-      <p class="lede">羽毛球、网球、乒乓球。单打、双打、混双，表演赛、联赛、淘汰赛。</p>
+      <p class="lede">羽毛球、网球、乒乓球、田径。单打、双打、混双，表演赛、联赛、淘汰赛。</p>
     </div>
     <div class="sports" id="sports">
       <button class="sport" type="button" data-sport="badminton"><i class="ico badminton"></i><span class="n">羽毛球</span></button>
       <button class="sport" type="button" data-sport="tennis"><i class="ico tennis"></i><span class="n">网球</span></button>
       <button class="sport" type="button" data-sport="pingpong"><i class="ico pingpong"></i><span class="n">乒乓球</span></button>
+      <button class="sport" type="button" data-sport="athletics"><i class="ico athletics"></i><span class="n">田径</span></button>
     </div>
     <p class="spec" id="spec"></p>
     <div class="opts">
       <div class="row"><span class="lbl">模式</span><div class="seg" id="mode"><button type="button" data-v="exh">表演赛</button><button type="button" data-v="league">联赛</button><button type="button" data-v="cup">淘汰赛</button></div></div>
-      <div class="row"><span class="lbl">项目</span><div class="seg" id="fmt"><button type="button" data-v="singles">单打</button><button type="button" data-v="doubles">双打</button><button type="button" data-v="mixed">混双</button></div></div>
+      <div class="row" id="athEvRow" hidden><span class="lbl">项目</span><div class="seg" id="athEvent"><button type="button" data-v="400">400 米</button><button type="button" data-v="1500">1500 米</button><button type="button" data-v="lj">跳远</button><button type="button" data-v="hj">跳高</button></div></div>
+      <div class="row" id="fmtRow"><span class="lbl">项目</span><div class="seg" id="fmt"><button type="button" data-v="singles">单打</button><button type="button" data-v="doubles">双打</button><button type="button" data-v="mixed">混双</button></div></div>
       <div class="row" id="genderRow"><span class="lbl">组别</span><div class="seg" id="gender"><button type="button" data-v="M">男子</button><button type="button" data-v="F">女子</button></div></div>
-      <div class="row"><span class="lbl">赛制</span><div class="seg" id="len"><button type="button" data-v="quick">快速</button><button type="button" data-v="std">标准</button></div></div>
+      <div class="row" id="lenRow"><span class="lbl">赛制</span><div class="seg" id="len"><button type="button" data-v="quick">快速</button><button type="button" data-v="std">标准</button></div></div>
     </div>
     <div class="picks">
       <button class="pick" id="pickMe" type="button"><span class="who">你</span><span class="pn"><b></b><small></small></span><span class="ovr"></span></button>
@@ -286,6 +311,7 @@ table.stand{width:100%;border-collapse:collapse;font-size:14px}
     <h1 id="overTitle">胜利</h1>
     <div id="overScore">21<i>–</i>15</div>
     <p id="overNames"></p>
+    <div id="overTable" class="fixtures" hidden></div>
     <button class="go" id="toHub" type="button" hidden>返回赛事</button>
     <button class="go" id="again" type="button">再来一场</button>
     <button class="btn2" id="toMenu" type="button">返回主菜单</button>
@@ -354,6 +380,12 @@ function rng(seed){let s=seed>>>0;return()=>{s=(Math.imul(s,1664525)+1013904223)
     p.ovr=Math.round((p.pow+p.sta+p.spd+p.ctl)/4);PEOPLE[p.id]=p;ROSTER[sp].push(p);
   }));
 });
+{const XN={M:NAMES.M.concat(['程野','宋知行','叶川','魏峥','Daniel Okafor','Rafael Costa','Jonas Lindqvist','Amir Haddad']),F:NAMES.F.concat(['白芷宁','顾清越','沈一禾','何予安','Chloé Martin','Aisha Bello','Nora Eriksen','Mei Tanaka'])};
+ const r=rng(53*7919);ROSTER.athletics=[];
+ ['M','F'].forEach(g=>XN[g].forEach((n,i)=>{const a=()=>Math.round(52+r()*45);
+   const p={id:'athletics-'+g+i,sport:'athletics',name:n,g,pow:a(),sta:a(),spd:a(),ctl:a()};p.ovr=Math.round((p.pow+p.sta+p.spd+p.ctl)/4);PEOPLE[p.id]=p;ROSTER.athletics.push(p);}));}
+const isAth=()=>settings.sport==='athletics';
+const effFmt=()=>isAth()?'singles':settings.fmt;
 const ATTRS=[['pow','力量'],['sta','体力'],['spd','速度'],['ctl','控制']];
 const spdMul=p=>.8+.3*p.spd/100;
 const ctlMul=p=>1.45-.6*p.ctl/100;
@@ -366,12 +398,12 @@ const teamOvr=ids=>Math.round(ids.reduce((s,id)=>s+PEOPLE[id].ovr,0)/ids.length)
 /* ---------------- settings & storage ---------------- */
 const SKEY='racket-trio-settings-v2',EKEY='racket-trio-event-v2';
 const store={get(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del(k){try{localStorage.removeItem(k);}catch(e){}}};
-const settings=Object.assign({sport:'badminton',mode:'exh',fmt:'singles',gender:'M',len:'quick',diff:'normal',auto:false,view:'fp',picks:{}},store.get(SKEY)||{});
-if(!SPORTS[settings.sport])settings.sport='badminton';
+const settings=Object.assign({athEvent:'400',sport:'badminton',mode:'exh',fmt:'singles',gender:'M',len:'quick',diff:'normal',auto:false,view:'fp',picks:{}},store.get(SKEY)||{});
+if(!SPORTS[settings.sport]&&settings.sport!=='athletics')settings.sport='badminton';
 if(!settings.picks||typeof settings.picks!=='object')settings.picks={};
 function saveSettings(){store.set(SKEY,settings);}
 const D=()=>DIFF[settings.diff]||DIFF.normal;
-let ev=store.get(EKEY);if(ev&&(!ev.entrants||!SPORTS[ev.sport]))ev=null;
+let ev=store.get(EKEY);if(ev&&!(ev.kind==='ath'?(ev.athEvent&&(ev.ids||ev.groups)):(ev.entrants&&SPORTS[ev.sport])))ev=null;
 function saveEv(){if(ev)store.set(EKEY,ev);else store.del(EKEY);}
 
 /* shared state (declared early: resize() reads it) */
@@ -620,7 +652,7 @@ function playerShot(e,key,isServe){
 /* ---------------- match engine ---------------- */
 const camPos=new THREE.Vector3(0,5,10),camLook=new THREE.Vector3();
 function startMatch(m){
-  match=m;
+  match=m;ath=null;lastAth=null;racketHud();
   cfg=makeCfg(m.sport,m.fmt);
   buildWorld(m.sport);setTeams(m.teams);
   aim.x=0;aim.d=.7;
@@ -929,6 +961,8 @@ function previewTeams(){
   return t;
 }
 function refreshPreview(force){
+  if($('hub').hidden&&isAth()){const me=curPick().me;athPreview(settings.athEvent,[me].concat(ROSTER.athletics.filter(p=>p.g===settings.gender&&p.id!==me).slice(0,7).map(p=>p.id)));return;}
+  if(!$('hub').hidden&&ev&&ev.kind==='ath')return;
   const sport=(!$('hub').hidden&&ev)?ev.sport:settings.sport,fmt=(!$('hub').hidden&&ev)?ev.fmt:settings.fmt;
   const teams=(!$('hub').hidden&&ev)?{P:ev.entrants[0].members,A:ev.entrants[1].members}:previewTeams();
   const sig=sport+'|'+fmt+'|'+teams.P.join()+'|'+teams.A.join();
@@ -940,6 +974,7 @@ function refreshPreview(force){
   ball.stopped=false;
 }
 function updatePreview(dt){
+  if(worldKey==='athletics'&&athPrevFocus){orbitT+=dt*.1;const f=athPrevFocus;camera.position.set(f.x+Math.sin(orbitT)*f.r,f.h,f.z+Math.cos(orbitT)*f.r);camera.lookAt(f.x,f.y,f.z);athPrevEnts.forEach(a=>animAthlete(a,0,dt,'run'));return;}
   if(!hero)return;
   orbitT+=dt*.12;const o=cfg.orbit;
   camera.position.set(Math.sin(orbitT)*o.r,o.h,Math.cos(orbitT)*o.r);camera.lookAt(0,o.y,0);
@@ -983,7 +1018,7 @@ function endMatch(){
   $('overNames').textContent=teamName(match.teams.P)+'  vs  '+teamName(match.teams.A);
   const inEv=!!match.ev;
   if(inEv)recordHumanResult(won,my,their);
-  $('toHub').hidden=!inEv;$('again').hidden=inEv;
+  $('toHub').hidden=!inEv;$('again').hidden=inEv;$('overTable').hidden=true;
   $('over').hidden=false;
   if(won)setTimeout(chime,120);
 }
@@ -991,18 +1026,19 @@ function endMatch(){
 /* ---------------- menu ---------------- */
 function curPick(){const p=settings.picks[settings.sport]||(settings.picks[settings.sport]={});return p;}
 function eligible(role){
-  const r=ROSTER[settings.sport],f=settings.fmt,g=settings.gender,pk=curPick();
+  const r=ROSTER[settings.sport],f=effFmt(),g=settings.gender,pk=curPick();
   if(role==='me')return f==='mixed'?r:r.filter(p=>p.g===g);
   const me=PEOPLE[pk.me];
   if(f==='doubles')return r.filter(p=>p.g===g&&p.id!==pk.me);
   if(f==='mixed')return r.filter(p=>p.g!==me.g);
   return [];
 }
-const bestOf=list=>list.reduce((a,b)=>b.ovr>a.ovr?b:a,list[0]);
+const ovrOf=p=>isAth()?athOvr(p,settings.athEvent):p.ovr;
+const bestOf=list=>list.reduce((a,b)=>ovrOf(b)>ovrOf(a)?b:a,list[0]);
 function fixPicks(){
   const pk=curPick();
   let el=eligible('me');if(!el.some(p=>p.id===pk.me))pk.me=bestOf(el).id;
-  if(settings.fmt!=='singles'){el=eligible('mate');if(!el.some(p=>p.id===pk.mate))pk.mate=bestOf(el).id;}
+  if(effFmt()!=='singles'){el=eligible('mate');if(!el.some(p=>p.id===pk.mate))pk.mate=bestOf(el).id;}
 }
 let exhCache=null;
 function exhOpponents(stable){
@@ -1021,23 +1057,27 @@ function syncSeg(id,val){document.querySelectorAll('#'+id+' button').forEach(b=>
 function renderMenu(){
   fixPicks();
   document.querySelectorAll('.sport').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sport===settings.sport));
-  $('spec').textContent=SPORTS[settings.sport].spec;
-  ['mode','fmt','gender','len','diff','view'].forEach(k=>syncSeg(k,settings[k]));
-  $('genderRow').hidden=settings.fmt==='mixed';
+  const A=isAth();
+  $('spec').textContent=A?ATH_SPEC[settings.athEvent]:SPORTS[settings.sport].spec;
+  ['mode','fmt','gender','len','diff','view','athEvent'].forEach(k=>syncSeg(k,settings[k]));
+  $('genderRow').hidden=!A&&settings.fmt==='mixed';
+  $('athEvRow').hidden=!A;$('fmtRow').hidden=A;$('lenRow').hidden=A;
+  const ml=A?{exh:'决赛',league:'大奖赛',cup:'预赛+决赛'}:{exh:'表演赛',league:'联赛',cup:'淘汰赛'};
+  document.querySelectorAll('#mode button').forEach(b=>b.textContent=ml[b.dataset.v]);
   $('auto').checked=!!settings.auto;
   const pk=curPick(),me=PEOPLE[pk.me];
-  const fill=(el,p)=>{el.querySelector('.pn b').textContent=p.name+(settings.fmt==='mixed'?(p.g==='M'?'（男）':'（女）'):'');el.querySelector('.pn small').textContent=attrLine(p);el.querySelector('.ovr').textContent=p.ovr;};
+  const fill=(el,p)=>{el.querySelector('.pn b').textContent=p.name+(settings.fmt==='mixed'?(p.g==='M'?'（男）':'（女）'):'');el.querySelector('.pn small').textContent=attrLine(p);el.querySelector('.ovr').textContent=ovrOf(p);};
   fill($('pickMe'),me);
-  $('pickMate').hidden=settings.fmt==='singles';
-  if(settings.fmt!=='singles')fill($('pickMate'),PEOPLE[pk.mate]);
-  $('start').textContent={exh:'开始比赛',league:'开始联赛',cup:'开始淘汰赛'}[settings.mode];
+  $('pickMate').hidden=effFmt()==='singles';
+  if(effFmt()!=='singles')fill($('pickMate'),PEOPLE[pk.mate]);
+  $('start').textContent=A?{exh:'开始决赛',league:'开始大奖赛',cup:'开始预赛'}[settings.mode]:{exh:'开始比赛',league:'开始联赛',cup:'开始淘汰赛'}[settings.mode];
   $('resume').hidden=!ev;
-  if(ev)$('resume').textContent='继续赛事 · '+SPORTS[ev.sport].name+fmtLabel(ev.fmt,ev.gender)+(ev.type==='league'?'联赛':'淘汰赛')+(ev.done?'（已结束）':'');
+  if(ev)$('resume').textContent='继续赛事 · '+(ev.kind==='ath'?'田径'+(ev.gender==='M'?'男子':'女子')+ATH_EVENTS[ev.athEvent].name+(ev.type==='league'?'大奖赛':'预赛+决赛'):SPORTS[ev.sport].name+fmtLabel(ev.fmt,ev.gender)+(ev.type==='league'?'联赛':'淘汰赛'))+(ev.done?'（已结束）':'');
   saveSettings();
   refreshPreview();
 }
 function bindSeg(id,key){$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;settings[key]=b.dataset.v;exhCache=null;renderMenu();if(key==='view')setView(b.dataset.v);});}
-['mode','fmt','gender','len','diff','view'].forEach(k=>bindSeg(k,k));
+['mode','fmt','gender','len','diff','view','athEvent'].forEach(k=>bindSeg(k,k));
 $('sports').addEventListener('click',e=>{const b=e.target.closest('.sport');if(!b)return;settings.sport=b.dataset.sport;exhCache=null;renderMenu();});
 $('auto').addEventListener('change',e=>{settings.auto=e.target.checked;saveSettings();});
 
@@ -1046,9 +1086,9 @@ function openRoster(role){
   rosterRole=role;
   $('rosterTitle').textContent=role==='me'?'选择你的球员':'选择搭档';
   const pk=curPick(),cur=role==='me'?pk.me:pk.mate;
-  const list=eligible(role).slice().sort((a,b)=>b.ovr-a.ovr);
+  const list=eligible(role).slice().sort((a,b)=>ovrOf(b)-ovrOf(a));
   $('rosterList').innerHTML=list.map(p=>'<button class="rrow" type="button" data-id="'+p.id+'" aria-pressed="'+(p.id===cur)+'"><span class="gt">'+(p.g==='M'?'男':'女')+'</span><span class="rn"><b>'+esc(p.name)+'</b><span class="bars">'+
-    ATTRS.map(([k,l])=>'<span class="bar"><span>'+l+' '+p[k]+'</span><i><b style="width:'+p[k]+'%"></b></i></span>').join('')+'</span></span><span class="ovr">'+p.ovr+'</span></button>').join('');
+    ATTRS.map(([k,l])=>'<span class="bar"><span>'+l+' '+p[k]+'</span><i><b style="width:'+p[k]+'%"></b></i></span>').join('')+'</span></span><span class="ovr">'+ovrOf(p)+'</span></button>').join('');
   $('menu').hidden=true;$('roster').hidden=false;$('roster').scrollTop=0;
 }
 $('rosterList').addEventListener('click',e=>{const b=e.target.closest('.rrow');if(!b)return;const pk=curPick();pk[rosterRole]=b.dataset.id;exhCache=null;$('roster').hidden=true;$('menu').hidden=false;renderMenu();});
@@ -1058,16 +1098,24 @@ $('pickMate').addEventListener('click',()=>openRoster('mate'));
 
 function exhMatch(){const pk=curPick();return {sport:settings.sport,fmt:settings.fmt,gender:settings.gender,len:settings.len,teams:{P:[pk.me].concat(settings.fmt!=='singles'?[pk.mate]:[]),A:exhOpponents(true)},ev:null};}
 $('start').addEventListener('click',()=>{
+  if(isAth()){
+    fixPicks();
+    if(settings.mode==='exh'){const me=curPick().me,ids=[me].concat(shuffle(ROSTER.athletics.filter(p=>p.g===settings.gender&&p.id!==me)).slice(0,7).map(p=>p.id));
+      athStartMeet({evk:settings.athEvent,gender:settings.gender,ids,label:'决赛',onDone:null});}
+    else{athCreateEvent();showHub();}
+    return;
+  }
   if(settings.mode==='exh'){startMatch(exhMatch());exhCache=null;}
   else{createEvent();showHub();}
 });
 $('resume').addEventListener('click',showHub);
-$('again').addEventListener('click',()=>{if(match&&!match.ev)startMatch(match);});
+$('again').addEventListener('click',()=>{if(lastAth&&!lastAth.onDone&&!match)athStartMeet(lastAth);else if(match&&!match.ev)startMatch(match);});
 $('toMenu').addEventListener('click',openMenu);
 $('toHub').addEventListener('click',showHub);
-$('menuBtn').addEventListener('click',()=>{if(match&&match.ev&&game&&game.phase!=='over'){showHub();}else openMenu();});
-function hideAll(){['menu','over','hub','roster','hud'].forEach(id=>$(id).hidden=true);}
-function openMenu(){game=null;menuOpen=true;hideAll();$('menu').hidden=false;previewSig='';renderMenu();setTimeout(applyFov,0);}
+$('menuBtn').addEventListener('click',()=>{if(ath){if(ath.meet.onDone&&ev)showHub();else openMenu();return;}if(match&&match.ev&&game&&game.phase!=='over'){showHub();}else openMenu();});
+function hideAll(){['menu','over','hub','roster','hud','athHud','overTable'].forEach(id=>$(id).hidden=true);}
+function racketHud(){$('hud').classList.remove('athmode');$('bug').hidden=false;$('viewBtn').hidden=false;$('athHud').hidden=true;$('btnA').textContent='攻';$('btnB').textContent='巧';$('btnB').hidden=false;}
+function openMenu(){game=null;ath=null;menuOpen=true;hideAll();$('menu').hidden=false;previewSig='';renderMenu();setTimeout(applyFov,0);}
 
 /* ---------------- events: league & knockout ---------------- */
 function roundRobin(n){const ids=[...Array(n).keys()];if(n%2)ids.push(-1);const m=ids.length,rounds=[];
@@ -1127,7 +1175,8 @@ function fxRow(f){
 }
 function showHub(){
   if(!ev){openMenu();return;}
-  game=null;menuOpen=true;hideAll();$('hub').hidden=false;$('hub').scrollTop=0;
+  if(ev.kind==='ath'){athShowHub();return;}
+  game=null;ath=null;menuOpen=true;hideAll();$('hub').hidden=false;$('hub').scrollTop=0;
   $('hubEyebrow').textContent=SPORTS[ev.sport].name+' · '+fmtLabel(ev.fmt,ev.gender)+' · '+ruleText(ev.sport,ev.len);
   $('hubTitle').textContent=ev.type==='league'?'联赛':'淘汰赛';
   let html='';
@@ -1172,11 +1221,475 @@ function showHub(){
 }
 $('hubMenu').addEventListener('click',openMenu);
 
+/* ================= ATHLETICS ================= */
+const ATH_EVENTS={
+  '400':{name:'400 米',kind:'run',dist:400,ts:1,keys:'W/S 调整配速 · 按住 J 冲刺 · J 起跑',touch:'摇杆上下调配速 · 按住「冲刺」全力跑'},
+  '1500':{name:'1500 米',kind:'run',dist:1500,ts:1.6,keys:'W/S 调整配速 · A/D 变道 · 按住 J 冲刺 · 跟在别人身后省体力',touch:'摇杆上下调配速、左右变道 · 按住「冲刺」全力跑'},
+  lj:{name:'跳远',kind:'lj',keys:'连按 J 助跑加速 · 到踏板按住 K 起跳 · 松开 K 定起跳角（约 20° 最远）',touch:'连点「跑」加速 · 到踏板按住「跳」 · 松开定角度（约 20° 最远）'},
+  hj:{name:'跳高',kind:'hj',keys:'J 开始助跑 · 白标进绿区时按 J 起跳 · 过杆时按 K 挺髋',touch:'「跳」开始助跑 · 白标进绿区按「跳」 · 过杆时按「挺」'}
+};
+const ATH_SPEC={'400':'标准 400 m 跑道 · 分道跑 · 体力分配决定成绩','1500':'3 又 3/4 圈 · 不分道 · 跟跑可省体力','lj':'助跑 42 m · 踏板起跳 · 3 次试跳取最好','hj':'背越式 · 每个高度 3 次机会 · 连续 3 次失败出局'};
+const ATH_W={'400':{spd:.4,pow:.35,sta:.25,ctl:0},'1500':{sta:.55,spd:.25,pow:.1,ctl:.1},lj:{spd:.4,pow:.35,ctl:.25,sta:0},hj:{pow:.4,ctl:.35,spd:.25,sta:0}};
+function athOvr(p,k){const w=ATH_W[k];return Math.round(p.pow*w.pow+p.sta*w.sta+p.spd*w.spd+p.ctl*w.ctl);}
+const TR={L:84.39,R1:36.8,lw:1.22};
+const LJ={z:12,start:-42,pitA:1,pitB:10};
+const HJ={x:-14,z:-14};
+const ATH_DIFF={easy:.965,normal:.985,hard:1};
+const athD=()=>ATH_DIFF[settings.diff]||.985;
+let ath=null,athPrevFocus=null,hjBar=null,ljMark=null,lastAth=null;
+
+function fmtTime(t){if(t==null)return '—';if(t<60)return t.toFixed(2);const m=Math.floor(t/60),s=t-m*60;return m+':'+(s<10?'0':'')+s.toFixed(2);}
+function fmtMark(evk,r){if(r.dq)return r.dq;if(r.mark==null)return '无成绩';return ATH_EVENTS[evk].kind==='run'?fmtTime(r.mark):r.mark.toFixed(2)+' m';}
+
+/* ---------- stadium ---------- */
+function stadiumPath(P,R){P.moveTo(TR.L/2,R);P.absarc(TR.L/2,0,R,Math.PI/2,-Math.PI/2,true);P.lineTo(-TR.L/2,-R);P.absarc(-TR.L/2,0,R,-Math.PI/2,Math.PI/2,true);P.lineTo(TR.L/2,R);return P;}
+function ringMesh(Rout,Rin,color,y){const s=stadiumPath(new THREE.Shape(),Rout);s.holes.push(stadiumPath(new THREE.Path(),Rin));const m=new THREE.Mesh(new THREE.ShapeGeometry(s,24),mat(color,{roughness:.85}));m.rotation.x=-Math.PI/2;m.position.y=y;return m;}
+function buildStadium(g){
+  scene.background=new THREE.Color(0x9cc3e4);scene.fog=new THREE.Fog(0x9cc3e4,120,280);hemi.intensity=1.0;sun.intensity=1.05;
+  rect(g,0,0,420,420,0,mat(0x2a5a35));
+  const Rk=TR.R1-.3,red=0x8e3423,white=0xf4f4f0;
+  g.add(ringMesh(Rk+8*TR.lw+1.2,Rk,red,.003));
+  g.add(ringMesh(Rk,Rk-.12,0xe8e8e8,.012));
+  for(let i=1;i<=8;i++){const R=Rk+i*TR.lw;g.add(ringMesh(R+.025,R-.025,white,.007));}
+  rect(g,TR.L/2,Rk+4*TR.lw,.08,8*TR.lw,.009,mat(white));
+  const sm=mat(0x2a3552),cm=mat(0x3c4a6e);
+  for(const s of[-1,1]){box(g,170,10,16,0,5,s*74,sm);box(g,170,1,4,0,10.5,s*68,cm);box(g,16,10,120,s*118,5,0,sm);}
+  // long jump
+  rect(g,(LJ.start-1)/2,LJ.z,-LJ.start+1,1.3,.004,mat(red));
+  rect(g,-.1,LJ.z,.2,1.22,.008,mat(white));
+  rect(g,.02,LJ.z,.03,1.22,.009,mat(0x6f8f4f));
+  box(g,LJ.pitB-LJ.pitA,.06,2.8,(LJ.pitA+LJ.pitB)/2,.03,LJ.z,mat(0xe2c98f,{roughness:1}));
+  ljMark=blob(.22,.45);ljMark.visible=false;g.add(ljMark);
+  // high jump
+  rect(g,HJ.x+4,HJ.z+5,15,13,.004,mat(red));
+  box(g,5,.6,3,HJ.x,.3,HJ.z-1.7,mat(0x2f5fb3));
+  for(const s of[-1,1]){const p=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,2.6,8),mat(0xdddddd,{metalness:.5}));p.position.set(HJ.x+s*2.1,1.3,HJ.z);g.add(p);}
+  hjBar=new THREE.Group();const bar=new THREE.Mesh(new THREE.CylinderGeometry(.016,.016,4.2,8),mat(0xff8a3d));bar.rotation.z=Math.PI/2;hjBar.add(bar);hjBar.position.set(HJ.x,2,HJ.z);g.add(hjBar);
+}
+function makeAthlete(color,gender){
+  const root=new THREE.Group(),body=new THREE.Group();root.add(body);
+  const skin=mat(0xe0b08a),shirt=mat(color,{roughness:.7}),dark=mat(0x1b2233),shoe=mat(0xf6f6f6),hairM=mat(gender==='F'?0x3a2418:0x1b2233);
+  const legs=[],arms=[];
+  for(const s of[-1,1]){const hip=new THREE.Group();hip.position.set(s*.1,.86,0);const leg=new THREE.Mesh(new THREE.CylinderGeometry(.065,.055,.8,8),skin);leg.position.y=-.4;hip.add(leg);const sh=new THREE.Mesh(new THREE.BoxGeometry(.12,.08,.26),shoe);sh.position.set(0,-.82,-.04);hip.add(sh);body.add(hip);legs.push(hip);}
+  box(body,.36,.2,.22,0,.92,0,dark);
+  const torso=new THREE.Mesh(new THREE.CylinderGeometry(.2,.17,.6,12),shirt);torso.position.y=1.3;body.add(torso);
+  const bib=new THREE.Mesh(new THREE.PlaneGeometry(.18,.13),mat(0xf6f6f6));bib.position.set(0,1.3,-.195);bib.rotation.y=Math.PI;body.add(bib);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.12,16,12),skin);head.position.y=1.73;body.add(head);
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(.127,16,8,0,Math.PI*2,0,Math.PI/2),hairM);hair.position.y=1.75;hair.rotation.x=.25;body.add(hair);
+  if(gender==='F'){const pt=new THREE.Mesh(new THREE.SphereGeometry(.06,10,8),hairM);pt.position.set(0,1.66,.15);pt.scale.set(.8,1.5,.8);body.add(pt);root.scale.setScalar(.95);}
+  for(const s of[-1,1]){const sh=new THREE.Group();sh.position.set(s*.25,1.52,0);const a=new THREE.Mesh(new THREE.CylinderGeometry(.045,.038,.6,8),skin);a.position.y=-.3;sh.add(a);sh.rotation.z=s*.08;body.add(sh);arms.push(sh);}
+  return {mesh:root,body,legs,arms,shadow:blob(.38,.3),phase:0};
+}
+function animAthlete(a,speed,dt,pose){
+  a.phase+=speed*dt*2.3;
+  if(pose==='fly'){a.legs.forEach(l=>l.rotation.x=lerp(l.rotation.x,-1.25,.3));a.arms.forEach(l=>l.rotation.x=lerp(l.rotation.x,-2.6,.3));return;}
+  const amp=speed<.2?0:Math.min(1,speed/7)*.9+.15,s=Math.sin(a.phase);
+  a.legs[0].rotation.x=s*amp;a.legs[1].rotation.x=-s*amp;
+  a.arms[0].rotation.x=-s*amp*.9;a.arms[1].rotation.x=s*amp*.9;
+  a.body.rotation.x=lerp(a.body.rotation.x,-.12*Math.min(1,speed/9),.2);
+  a.body.position.y=Math.abs(s)*.05*Math.min(1,speed/4);
+}
+const ATH_COLORS=[0x2fc4b8,0xff6f4f,0xf2a93b,0x8a6cf0,0x3d8bf2,0xe85d9b,0x6cc04a,0xd0d4dc,0x2e3a59,0x9b5b2f,0xe0c341,0x47b5c9,0xc94747,0x7a7f8c,0x56a36c,0xb07ce0];
+function athFocus(evk){return evk==='lj'?{x:-6,z:LJ.z,r:20,h:7,y:1}:evk==='hj'?{x:HJ.x,z:HJ.z,r:13,h:5,y:1.2}:{x:0,z:0,r:78,h:30,y:0};}
+function athBuildWorld(evk,ids){
+  if(world)scene.remove(world);
+  world=new THREE.Group();scene.add(world);worldKey='athletics';ents=[];hero=null;
+  if(vm)vm.visible=false;
+  buildStadium(world);
+  document.documentElement.style.setProperty('--accent','#ffb547');
+  return ids.map((id,i)=>{const p=PEOPLE[id],a=makeAthlete(ATH_COLORS[i%ATH_COLORS.length],p.g);world.add(a.mesh,a.shadow);return Object.assign(a,{p,human:i===0,i});});
+}
+function placeAthlete(a,x,z,dx,dz,y){a.mesh.position.set(x,y||0,z);a.mesh.rotation.y=Math.atan2(-dx,-dz);a.shadow.position.set(x,.012,z);}
+
+/* ---------- track geometry ---------- */
+function lanePos(u,R){
+  const L=TR.L,R1=TR.R1,C=Math.PI*R1;let w=((u%400)+400)%400;
+  if(w<C){const t=w/R1;return {x:L/2+R*Math.sin(t),z:R*Math.cos(t),dx:Math.cos(t),dz:-Math.sin(t),curve:true};}
+  w-=C;if(w<L)return {x:L/2-w,z:-R,dx:-1,dz:0,curve:false};
+  w-=L;if(w<C){const t=w/R1;return {x:-L/2-R*Math.sin(t),z:-R*Math.cos(t),dx:-Math.cos(t),dz:Math.sin(t),curve:true};}
+  w-=C;return {x:-L/2+w,z:R,dx:1,dz:0,curve:false};
+}
+function actualDist(u0,u1,R){let s=0;for(let u=u0;u<u1;u+=.5){const du=Math.min(.5,u1-u);s+=du*(lanePos(u+du/2,R).curve?R/TR.R1:1);}return s;}
+function solveStart(R){let a=0,b=80;for(let i=0;i<30;i++){const m=(a+b)/2;if(actualDist(m,400,R)>400)a=m;else b=m;}return (a+b)/2;}
+
+/* ---------- physiology / capability ---------- */
+function runParams(p){const m=p.g==='M';return {vmax:(m?10:9)*(.9+.133*p.spd/100),vc:(m?6:5.3)*(.88+.16*p.sta/100),W:(m?175:145)*(.8+.27*p.pow/100)};}
+/* anaerobic reserve drains superlinearly above critical speed, so even pacing beats going out flat */
+function drainR(rp,v,vc){vc=vc||rp.vc;return v<=vc?-(vc-v)*.25:(v-vc)*(1+1.5*Math.pow((v-vc)/(rp.vmax-rp.vc),2));}
+function optV(rp,rem,W){if(W<=0)return rp.vc;let a=rp.vc,b=rp.vmax;if(rem*drainR(rp,b)/b<=W)return b;for(let i=0;i<26;i++){const m=(a+b)/2;if(rem*drainR(rp,m)/m>W)b=m;else a=m;}return a;}
+function ljParams(p){const m=p.g==='M';return {vmax:(m?11.8:10.6)*(.9+.133*p.spd/100),pw:.92+.1*p.pow/100,angRate:58-28*p.ctl/100};}
+function ljDist(v,ang,pw){const eff=Math.max(0,1-Math.pow((ang-21)/24,2));return Math.pow(v*pw,2)*Math.sin(42*Math.PI/180)/9.8*eff+.25;}
+function hjCap(p){const s=(.45*p.pow+.3*p.spd+.25*p.ctl)/100;return p.g==='M'?1.92+.42*s:1.62+.4*s;}
+function hjHeights(g){return g==='M'?[2.00,2.05,2.10,2.15,2.20,2.24,2.27,2.30,2.33,2.36,2.39,2.42,2.45]:[1.70,1.75,1.80,1.85,1.88,1.91,1.94,1.97,2.00,2.03,2.06,2.09];}
+function aiLJ(p,dm){const lp=ljParams(p),c=1.3-p.ctl/100;
+  if(Math.random()<.11*c+.03)return null;
+  const v=lp.vmax*(.875+.05*Math.random())*dm,ang=21+gauss()*3.5*c,to=-Math.abs(gauss()*.12*c);
+  return Math.max(0,to+ljDist(v,ang,lp.pw));}
+function aiHJ(p,bar,dm){return Math.random()<1/(1+Math.exp(-(hjCap(p)*dm-bar)/.025));}
+function rankResults(evk,res){
+  const run=ATH_EVENTS[evk].kind==='run';
+  return res.slice().sort((a,b)=>{
+    const am=a.dq||a.mark==null,bm=b.dq||b.mark==null;if(am!==bm)return am?1:-1;if(am)return 0;
+    if(run)return a.mark-b.mark;
+    if(b.mark!==a.mark)return b.mark-a.mark;
+    if(evk==='hj')return (a.missAt||0)-(b.missAt||0)||(a.miss||0)-(b.miss||0);
+    return (b.second||0)-(a.second||0);
+  });
+}
+function simMeet(ids,evk){
+  const E=ATH_EVENTS[evk],dm=1;
+  const res=ids.map(id=>{
+    const p=PEOPLE[id];
+    if(E.kind==='run'){const rp=runParams(p);return {id,mark:1.3+E.dist/optV(rp,E.dist,rp.W*.95)*(1+gauss()*.008)};}
+    if(E.kind==='lj'){const ms=[0,1,2].map(()=>aiLJ(p,dm)).filter(m=>m!=null).sort((a,b)=>b-a);return {id,mark:ms.length?ms[0]:null,second:ms[1]||0};}
+    let best=null,miss=0,missAt=0,cons=0;
+    for(const h of hjHeights(p.g)){let ok=false,m=0;for(let t=0;t<3&&cons<3;t++){if(aiHJ(p,h,dm)){ok=true;break;}m++;cons++;}miss+=m;if(ok){best=h;missAt=m;cons=0;}if(cons>=3)break;}
+    return {id,mark:best,miss,missAt};
+  });
+  return rankResults(evk,res);
+}
+
+/* ---------- meet lifecycle ---------- */
+function athStartMeet(meet){
+  lastAth=meet;match=null;game=null;menuOpen=false;previewSig='';$('athRows').innerHTML='';$('athMeters').innerHTML='';setBig('');
+  ['menu','over','hub','roster'].forEach(id=>$(id).hidden=true);
+  $('hud').hidden=false;$('hud').classList.add('athmode');$('bug').hidden=true;$('viewBtn').hidden=true;$('athHud').hidden=false;
+  const E=ATH_EVENTS[meet.evk];
+  const ents2=athBuildWorld(meet.evk,meet.ids);
+  ath={evk:meet.evk,E,meet,ents:ents2,hero:ents2[0],phase:'intro',t:0,msgT:0,uiT:0,results:null};
+  $('btnA').textContent=E.kind==='run'?'冲刺':(E.kind==='lj'?'跑':'跳');
+  $('btnB').textContent=E.kind==='lj'?'跳':'挺';
+  $('btnB').hidden=E.kind==='run';
+  $('athTitle').textContent=E.name+' · '+(meet.gender==='M'?'男子':'女子')+(meet.label?' · '+meet.label:'');
+  hint(isTouch?E.touch:E.keys);{const ht=$('hint').textContent;setTimeout(()=>{if($('hint').textContent===ht)hint('');},7000);}
+  if(E.kind==='run')runInit();else if(E.kind==='lj')ljInit();else hjInit();
+  ensureAudio();if(isTouch&&fsOK&&!fsEl())enterFS();keepAwake();
+  camera.fov=camera.aspect<0.8?70:(camera.aspect<1.2?60:50);camera.updateProjectionMatrix();
+}
+function athFinish(res){
+  if(ath.phase==='done')return;
+  ath.phase='done';ath.results=rankResults(ath.evk,res);
+  const ranked=ath.results,place=ranked.findIndex(r=>r.id===ath.hero.p.id)+1,me=ranked[place-1];
+  $('overSport').textContent=ath.E.name+' · '+(ath.meet.gender==='M'?'男子':'女子')+(ath.meet.label?' · '+ath.meet.label:'');
+  $('overTitle').textContent=me.dq||me.mark==null?'没有成绩':(place===1?'冠军':'第 '+place+' 名');
+  $('overScore').textContent=fmtMark(ath.evk,me);
+  $('overNames').textContent='';
+  $('overTable').hidden=false;
+  $('overTable').innerHTML=ranked.map((r,i)=>'<div class="fx"><span class="'+(r.id===ath.hero.p.id?'me w':'')+'">'+(i+1)+'. '+esc(PEOPLE[r.id].name)+'</span><b></b><span>'+fmtMark(ath.evk,r)+'</span></div>').join('');
+  const inEv=!!ath.meet.onDone;
+  if(inEv)ath.meet.onDone(ranked);
+  $('toHub').hidden=!inEv;$('again').hidden=inEv;
+  setTimeout(()=>{if(ath&&ath.phase==='done'){$('over').hidden=false;if(place===1)chime();}},900);
+}
+function athPress(kind){
+  if(!ath||ath.phase==='done')return;
+  if(ath.E.kind==='run')runPress(kind);else if(ath.E.kind==='lj')ljPress(kind);else hjPress(kind);
+}
+const aHeld=()=>keys.KeyJ||keys.Space||touchA||mouseA;
+function athUpdate(dt){
+  if(!ath)return;
+  if(ath.E.kind==='run')runUpdate(dt);else if(ath.E.kind==='lj')ljUpdate(dt);else hjUpdate(dt);
+  ath.uiT-=dt;if(ath.uiT<=0){ath.uiT=.12;athUI();}
+}
+function setBig(t){$('athBig').textContent=t;}
+function boardRows(rows){$('athRows').innerHTML=rows.map((r,i)=>'<div class="br'+(r.me?' me':'')+'"><span>'+(i+1)+'</span><span class="bn">'+esc(r.name)+'</span><span class="bm2">'+r.mark+'</span></div>').join('');}
+
+/* ---------- running ---------- */
+function runInit(){
+  const E=ath.E,R=ath.ents,n=R.length;
+  let lanes=[3,4,2,5,1,6,0,7].slice(0,n);
+  const order=[0].concat(shuffle([...Array(n-1).keys()].map(i=>i+1)));
+  R.forEach(a=>{
+    const rp=runParams(a.p);Object.assign(a,rp,{v:0,Wp:rp.W,finished:false,time:null,started:false,effort:.78,react:.13+Math.random()*.08,pace:1+gauss()*.01,aiT:0,aiV:rp.vc});
+  });
+  order.forEach((ai,k)=>{
+    const a=R[ai];
+    if(E.dist===400){a.r=lanes[k];a.u=solveStart(TR.R1+a.r*TR.lw);a.uEnd=400;}
+    else{a.r=k*.55;a.u=100;a.uEnd=1600;}
+    a.u0=a.u;a.tR=a.r;
+  });
+  ath.phase='set';ath.t=0;ath.gun=2.6+Math.random()*1.1;ath.raceT=0;ath.fs=0;ath.humanGo=false;
+  R.forEach(a=>{const lp=lanePos(a.u,TR.R1+a.r*TR.lw);placeAthlete(a,lp.x,lp.z,lp.dx,lp.dz);});
+  camPos.set(0,30,60);
+}
+function runPress(kind){
+  if(kind!=='A')return;
+  if(ath.phase==='set'){
+    ath.fs++;sfx(180,.25,'square',.2);
+    if(ath.fs>=2){ath.hero.dq='抢跑犯规';toast('抢跑犯规','第二次抢跑，取消资格');ath.phase='race';ath.raceT=0;ath.hero.started=false;ath.hero.finished=true;ath.hero.time=null;sfx(300,.05,'square',.3);return;}
+    toast('抢跑','再抢跑一次就取消资格');ath.t=0;ath.gun=2.6+Math.random()*1.1;return;
+  }
+  if(ath.phase==='race'&&!ath.hero.started&&!ath.hero.dq){ath.hero.started=true;ath.hero.react=ath.raceT;toast('反应 '+ath.raceT.toFixed(3)+' s');}
+}
+function runUpdate(dt){
+  const E=ath.E,R=ath.ents,gdt=dt*E.ts*(ath.hero.finished?4:1),inp=input();
+  if(ath.phase==='set'){
+    ath.t+=dt;setBig(ath.t<1.3?'各就位':'预备');
+    if(ath.t>=ath.gun){ath.phase='race';ath.raceT=0;setBig('');toast('鸣枪！');sfx(900,.12,'square',.3);}
+  }else if(ath.phase==='race'){
+    ath.raceT+=gdt;
+    const h=ath.hero;
+    if(!h.finished){
+      h.effort=clamp(h.effort-inp.z*.4*dt,.35,1);
+      if(E.dist>400)h.tR=clamp(h.tR+inp.x*1.6*dt,0,6);
+      if(!h.started&&!h.dq&&ath.raceT>1.2){h.started=true;h.react=1.2;}
+    }
+    for(const a of R){
+      if(a.finished&&!a.coast)continue;
+      if(!a.started){if(!a.human&&ath.raceT>=a.react)a.started=true;else continue;}
+      const rem=a.uEnd-a.u;
+      if(!a.human){
+        a.aiT-=gdt;
+        if(a.aiT<=0){a.aiT=.3;const eff=.9*athD(),reserve=E.dist>400&&rem>330?.45:1;a.aiV=optV(a,rem,Math.max(0,a.Wp*eff*reserve))*a.pace*athD();
+          if(E.dist>400){const blk=aheadOf(a,1.3);if(blk&&blk.v<a.aiV-.05&&rem>60)a.tR=Math.min(2.2,blk.r+1);else if(!sideBusy(a))a.tR=0;}}
+      }
+      let target=a.finished?a.vc*.7:(a.human?(aHeld()?a.vmax:a.effort*a.vmax):a.aiV);
+      if(a.Wp<=0)target=Math.min(target,a.vc*.75);
+      if(a.v<target)a.v+=Math.min(target-a.v,3.6*(1-a.v/a.vmax*.55)*gdt);else a.v-=Math.min(a.v-target,1.6*gdt);
+      let vcE=a.vc;
+      if(E.dist>400){const o=aheadOf(a,2.6);if(o){const gap=o.u-a.u;if(gap<.9)a.v=Math.min(a.v,o.v);if(gap>=.5)vcE*=1.04;}
+        a.r+=clamp(a.tR-a.r,-gdt*1.2,gdt*1.2);}
+      a.Wp-=drainR(a,a.v,vcE)*gdt;a.Wp=Math.min(a.Wp,a.W);
+      const Rr=TR.R1+a.r*TR.lw,lp=lanePos(a.u,Rr),du=a.v*gdt*(lp.curve?TR.R1/Rr:1);
+      a.u+=du;
+      if(!a.finished&&a.u>=a.uEnd){a.finished=true;a.coast=true;const over=(a.u-a.uEnd)/Math.max(.1,du/gdt);a.time=ath.raceT-over;if(a.human)toast(fmtTime(a.time));}
+    }
+    if(R.every(a=>a.finished)){
+      ath.phase='post';ath.t=0;
+    }
+  }else if(ath.phase==='post'){
+    ath.t+=dt;for(const a of R){a.v=Math.max(0,a.v-3*dt);const Rr=TR.R1+a.r*TR.lw,lp=lanePos(a.u,Rr);a.u+=a.v*dt*(lp.curve?TR.R1/Rr:1);}
+    if(ath.t>1.2)athFinish(R.map(a=>({id:a.p.id,mark:a.dq?null:a.time,dq:a.dq})));
+  }
+  for(const a of R){const Rr=TR.R1+a.r*TR.lw,lp=lanePos(a.u,Rr);placeAthlete(a,lp.x,lp.z,lp.dx,lp.dz,a.body.position.y*0);animAthlete(a,a.v,dt,'run');}
+  // camera
+  const h=ath.hero,Rr=TR.R1+h.r*TR.lw,lp=lanePos(h.u,Rr),nx=-lp.dz,nz=lp.dx;
+  if(ath.phase==='set'){tmpV.set(lp.x-lp.dx*5+nx*2.5,2.2,lp.z-lp.dz*5+nz*2.5);camPos.lerp(tmpV,1-Math.exp(-3*dt));camLook.set(lp.x+lp.dx*6,1,lp.z+lp.dz*6);}
+  else{tmpV.set(lp.x-lp.dx*6.5+nx*1.6,2.5,lp.z-lp.dz*6.5+nz*1.6);camPos.lerp(tmpV,1-Math.exp(-4*dt));camLook.lerp(new THREE.Vector3(lp.x+lp.dx*10,1,lp.z+lp.dz*10),1-Math.exp(-5*dt));}
+  camera.position.copy(camPos);camera.lookAt(camLook);
+}
+function aheadOf(a,maxGap){let best=null,bg=maxGap;for(const o of ath.ents){if(o===a||!o.started)continue;const g=o.u-a.u;if(g>0&&g<bg&&Math.abs(o.r-a.r)<.55){bg=g;best=o;}}return best;}
+function sideBusy(a){for(const o of ath.ents){if(o===a)continue;const g=o.u-a.u;if(Math.abs(g)<1.6&&o.r<a.r-.2)return true;}return false;}
+
+/* ---------- long jump ---------- */
+function ljInit(){
+  ath.lj={round:0,turn:0,marks:Object.fromEntries(ath.ents.map(a=>[a.p.id,[]])),rounds:3};
+  ath.ents.forEach((a,i)=>{placeAthlete(a,LJ.start-3-i*.9,LJ.z+2.2+(i%2)*.8,1,0);animAthlete(a,0,0,'run');});
+  ljNextTurn();
+}
+function ljNextTurn(){
+  const L=ath.lj;
+  if(L.turn>=ath.ents.length){L.turn=0;L.round++;}
+  if(L.round>=L.rounds){const res=ath.ents.map(a=>{const ms=L.marks[a.p.id].filter(m=>m!=null).sort((x,y)=>y-x);return {id:a.p.id,mark:ms.length?ms[0]:null,second:ms[1]||0};});athFinish(res);return;}
+  const a=ath.ents[L.turn];L.cur=a;
+  if(a.human){
+    ath.phase='ready';Object.assign(L,{x:LJ.start,v:0,ang:0,to:null,airT:0});
+    placeAthlete(a,LJ.start,LJ.z,1,0);setBig('第 '+(L.round+1)+' 跳');
+    hint(isTouch?'连点「跑」开始助跑':'连按 J 开始助跑');
+  }else{ath.phase='ai';ath.t=0;}
+}
+function ljPress(kind){
+  const L=ath.lj;if(!L||!L.cur||!L.cur.human)return;
+  const lp=ljParams(L.cur.p);
+  if(kind==='A'&&(ath.phase==='ready'||ath.phase==='approach')){if(ath.phase==='ready'){ath.phase='approach';setBig('');hint('');}L.v+=.75*(1-L.v/lp.vmax);}
+  if(kind==='B'&&ath.phase==='approach'){L.to=L.x;ath.phase='angle';L.ang=0;L.vT=L.v;L.angT=0;}
+}
+function ljUpdate(dt){
+  const L=ath.lj,a=L.cur;
+  if(ath.phase==='ai'){
+    ath.t+=dt;
+    if(ath.t>.8){const m=aiLJ(a.p,athD());L.marks[a.p.id].push(m==null?null:+m.toFixed(2));toast(a.p.name+'：'+(m==null?'犯规':m.toFixed(2)+' m'));L.turn++;ljNextTurn();}
+  }else if(ath.phase==='approach'||ath.phase==='angle'){
+    const lp=ljParams(a.p);
+    if(ath.phase==='approach'){L.v=Math.max(0,L.v-.5*dt*(L.v/lp.vmax+.2));L.x+=L.v*dt;
+      if(L.x>1.2){ljResult(null,'没有起跳');}}
+    else{L.angT+=dt;L.ang=Math.min(45,L.ang+lp.angRate*dt);L.x+=L.v*dt*.25;
+      if(!bHeld()||L.angT>1.1){ath.phase='air';L.airT=0;L.d=ljDist(L.vT,L.ang,lp.pw);L.tf=.75+L.d*.035;L.peak=.45+L.ang/45*1.0;}}
+    placeAthlete(a,L.x,LJ.z,1,0,ath.phase==='angle'?Math.min(.3,L.angT*.6):0);animAthlete(a,L.v,dt,ath.phase==='angle'?'fly':'run');
+  }else if(ath.phase==='air'){
+    L.airT+=dt;const s=Math.min(1,L.airT/L.tf),x=L.to+L.d*s,y=.3+L.peak*4*s*(1-s);
+    placeAthlete(a,x,LJ.z,1,0,Math.max(0,y-.3*s));animAthlete(a,0,dt,'fly');
+    if(s>=1){const foul=L.to>0;ljMark.visible=true;ljMark.position.set(L.to+L.d,.065,LJ.z);ljResult(foul?null:+(L.to+L.d).toFixed(2),foul?'踩线犯规':null);}
+  }else if(ath.phase==='result'){
+    ath.t+=dt;if(ath.t>1.8){L.turn++;ljNextTurn();}
+  }
+  // camera
+  const fx=ath.phase==='ai'?-6:clamp((L.x||LJ.start)+(ath.phase==='air'?L.d*Math.min(1,L.airT/L.tf):0),LJ.start,9);
+  tmpV.set(fx+1.5,2.4,LJ.z+9.5);camPos.lerp(tmpV,1-Math.exp(-5*dt));camLook.lerp(new THREE.Vector3(fx+3.5,1,LJ.z),1-Math.exp(-6*dt));
+  camera.position.copy(camPos);camera.lookAt(camLook);
+}
+function ljResult(m,why){
+  const L=ath.lj;L.marks[L.cur.p.id].push(m);ath.phase='result';ath.t=0;
+  if(m==null){toast(why||'犯规');sfx(200,.25,'square',.2);}else{toast(m.toFixed(2)+' m',L.ang?('起跳角 '+L.ang.toFixed(0)+'° · 速度 '+L.vT.toFixed(1)+' m/s'):'');chime();}
+}
+
+/* ---------- high jump ---------- */
+function hjInit(){
+  const g=ath.meet.gender;
+  ath.hj={heights:hjHeights(g),hi:0,st:Object.fromEntries(ath.ents.map(a=>[a.p.id,{best:null,cons:0,out:false,miss:0,missAt:0,cur:0,log:{}}])),queue:[]};
+  ath.ents.forEach((a,i)=>{placeAthlete(a,HJ.x+6+i*.8,HJ.z+9,0,-1);animAthlete(a,0,0,'run');});
+  hjStartHeight();
+}
+function hjStartHeight(){
+  const H=ath.hj,act=ath.ents.filter(a=>!H.st[a.p.id].out);
+  if(!act.length||H.hi>=H.heights.length){hjDone();return;}
+  H.bar=H.heights[H.hi];hjBar.position.y=H.bar;hjBar.rotation.set(0,0,0);H.queue=act.slice();act.forEach(a=>{H.st[a.p.id].cur=0;});
+  toast('横杆升至 '+H.bar.toFixed(2)+' m');hjNext();
+}
+function hjDone(){athFinish(ath.ents.map(a=>{const s=ath.hj.st[a.p.id];return {id:a.p.id,mark:s.best,miss:s.miss,missAt:s.missAt};}));}
+function hjNext(){
+  const H=ath.hj;
+  if(!H.queue.length){H.hi++;setTimeout(()=>{if(ath&&ath.hj===H)hjStartHeight();},700);ath.phase='wait';return;}
+  const a=H.queue.shift();H.curA=a;const s=H.st[a.p.id];
+  hjBar.position.y=H.bar;hjBar.rotation.set(0,0,0);
+  if(a.human){ath.phase='ready';H.t=0;setBig(H.bar.toFixed(2)+' m · 第 '+(s.cur+1)+' 次');hint(isTouch?'点「跳」开始助跑':'按 J 开始助跑');placeAthlete(a,HJ.x+7,HJ.z+8,-.6,-.8);}
+  else{ath.phase='ai';ath.t=0;}
+}
+function hjAttempt(a,ok){
+  const H=ath.hj,s=H.st[a.p.id];
+  if(ok){s.best=H.bar;s.missAt=s.cur;s.cons=0;s.log[H.bar]=(s.log[H.bar]||'')+'O';}
+  else{s.cur++;s.miss++;s.cons++;s.log[H.bar]=(s.log[H.bar]||'')+'X';if(s.cons>=3)s.out=true;else if(s.cur<3)H.queue.push(a);}
+}
+function hjPress(kind){
+  const H=ath.hj;if(!H||!H.curA||!H.curA.human)return;
+  if(kind==='A'&&ath.phase==='ready'){ath.phase='approach';H.t=0;H.q1=null;setBig('');hint('');return;}
+  if(kind==='A'&&ath.phase==='approach'&&H.t>H.T-1&&H.q1==null){const m=(H.t-(H.T-1))/1;H.q1=clamp(1-Math.abs(m-.75)/.3,0,1);hjTakeoff();}
+  if(kind==='B'&&ath.phase==='air'&&H.q2==null){const s=H.t/H.TA;H.q2=clamp(1-Math.abs(s-.5)/.25,0,1);}
+}
+function hjTakeoff(){const H=ath.hj,a=H.curA;ath.phase='air';H.t=0;H.TA=.95;H.q2=null;H.peak=hjCap(a.p)*(.93+.07*H.q1);}
+function hjUpdate(dt){
+  const H=ath.hj,a=H.curA;
+  if(ath.phase==='ai'){
+    ath.t+=dt;if(ath.t>.55){const ok=aiHJ(a.p,H.bar,athD());hjAttempt(a,ok);toast(a.p.name+'：'+H.bar.toFixed(2)+(ok?' 成功':' 失败'));hjNext();}
+  }else if(ath.phase==='approach'){
+    H.T=2.4;H.t+=dt;const s=Math.min(1,H.t/H.T),e=s*s*(3-2*s);
+    const p0={x:HJ.x+7,z:HJ.z+8},c={x:HJ.x+5.5,z:HJ.z+1.6},p1={x:HJ.x+.6,z:HJ.z+.9};
+    const x=(1-e)*(1-e)*p0.x+2*(1-e)*e*c.x+e*e*p1.x,z=(1-e)*(1-e)*p0.z+2*(1-e)*e*c.z+e*e*p1.z;
+    const dx=2*(1-e)*(c.x-p0.x)+2*e*(p1.x-c.x),dz=2*(1-e)*(c.z-p0.z)+2*e*(p1.z-c.z),dl=Math.hypot(dx,dz)||1;
+    placeAthlete(a,x,z,dx/dl,dz/dl);animAthlete(a,5.5,dt,'run');a.body.rotation.x=0;
+    if(H.t>H.T+.15){H.q1=0;hjFail('没有起跳');}
+  }else if(ath.phase==='air'){
+    H.t+=dt;const s=Math.min(1,H.t/H.TA);
+    const x=lerp(HJ.x+.6,HJ.x-.3,s),z=lerp(HJ.z+.9,HJ.z-1.6,s),y=H.peak*4*s*(1-s)*.95;
+    placeAthlete(a,x,z,0,-1,Math.max(0,y-.9*s*s));a.body.rotation.x=Math.min(1.5,s*2.2);animAthlete(a,0,dt,'fly');
+    if(s>=1){const eff=H.peak+.04*((H.q2==null?0:H.q2)-.5)-.01+gauss()*.006,ok=eff>=H.bar;hjAttempt(a,ok);
+      if(ok){toast('成功 '+H.bar.toFixed(2)+' m','起跳 '+Math.round(H.q1*100)+' · 过杆 '+Math.round((H.q2||0)*100));chime();}
+      else{hjBar.rotation.z=.35;hjBar.position.y=H.bar-.5;toast('碰杆','起跳 '+Math.round(H.q1*100)+' · 过杆 '+Math.round((H.q2||0)*100));sfx(200,.25,'square',.2);}
+      ath.phase='result';ath.t=0;}
+  }else if(ath.phase==='result'){
+    ath.t+=dt;if(ath.t>1.7){a.body.rotation.x=0;placeAthlete(a,HJ.x+6+a.i*.8,HJ.z+9,0,-1);hjNext();}
+  }
+  {const ap=(ath.phase==='approach'||ath.phase==='ready')&&a&&a.human,mx=ap?(a.mesh.position.x+HJ.x)/2:HJ.x+.5,mz=ap?(a.mesh.position.z+HJ.z)/2:HJ.z+.3;
+   tmpV.set(HJ.x+10,3,HJ.z+7);camPos.lerp(tmpV,1-Math.exp(-4*dt));camLook.lerp(new THREE.Vector3(mx,1.3,mz),1-Math.exp(-4*dt));}
+  camera.position.copy(camPos);camera.lookAt(camLook);
+}
+function hjFail(why){const H=ath.hj;hjAttempt(H.curA,false);toast(why);ath.phase='result';ath.t=0;}
+
+/* ---------- athletics HUD ---------- */
+function athUI(){
+  if(!ath)return;
+  const E=ath.E,me=ath.hero,mtr=$('athMeters');
+  if(E.kind==='run'){
+    const R=ath.ents,rows=R.slice().sort((a,b)=>(a.finished&&b.finished)?((a.time??1e9)-(b.time??1e9)):(a.finished?-1:b.finished?1:(a.uEnd-a.u)-(b.uEnd-b.u)));
+    boardRows(rows.map(a=>({name:a.p.name,me:a.human,mark:a.dq?'犯规':a.finished?fmtTime(a.time):Math.max(0,a.uEnd-a.u).toFixed(0)+' m'})));
+    const rem=me.uEnd-me.u,sug=optV(me,Math.max(1,rem),me.Wp*.95)/me.vmax;
+    mtr.innerHTML='<div class="meter"><span>配速</span><i><b style="width:'+(aHeld()?100:me.effort*100).toFixed(0)+'%"></b><u style="left:'+(sug*100).toFixed(0)+'%"></u></i><em>'+(aHeld()?'冲刺':Math.round(me.effort*100)+'%')+'</em></div>'+
+      '<div class="meter"><span>体力</span><i><b class="'+(me.Wp<me.W*.2?'low':'')+'" style="width:'+Math.max(0,me.Wp/me.W*100).toFixed(0)+'%"></b></i><em>'+Math.max(0,me.Wp/me.W*100).toFixed(0)+'%</em></div>'+
+      '<div class="meter"><span>速度</span><em>'+me.v.toFixed(1)+' m/s</em></div><div class="meter"><span>时间</span><em>'+fmtTime(ath.phase==='set'?0:(me.finished&&me.time!=null?me.time:ath.raceT))+'</em></div>';
+  }else if(E.kind==='lj'){
+    const L=ath.lj,best=a=>{const ms=L.marks[a.p.id].filter(m=>m!=null);return ms.length?Math.max(...ms):null;};
+    const rows=ath.ents.slice().sort((a,b)=>(best(b)||0)-(best(a)||0));
+    boardRows(rows.map(a=>({name:a.p.name,me:a.human,mark:L.marks[a.p.id].map(m=>m==null?'X':m.toFixed(2)).join(' ')||'—'})));
+    const lp=ljParams(me.p),v=L.cur&&L.cur.human?(L.v||0):0;
+    mtr.innerHTML='<div class="meter"><span>第 '+Math.min(3,L.round+1)+' / 3 轮</span><em>'+(L.cur?esc(L.cur.p.name):'')+'</em></div>'+
+      '<div class="meter"><span>助跑速度</span><i><b style="width:'+(v/lp.vmax*100).toFixed(0)+'%"></b></i><em>'+v.toFixed(1)+' m/s</em></div>'+
+      '<div class="meter"><span>起跳角</span><i><b style="width:'+((L.ang||0)/45*100).toFixed(0)+'%"></b><u style="left:'+(21/45*100).toFixed(0)+'%"></u></i><em>'+(L.ang||0).toFixed(0)+'°</em></div>'+
+      '<div class="meter"><span>离踏板</span><em>'+(ath.phase==='approach'?(-L.x).toFixed(1)+' m':'—')+'</em></div>';
+  }else{
+    const H=ath.hj;
+    const rows=ath.ents.slice().sort((a,b)=>{const x=H.st[a.p.id],y=H.st[b.p.id];return (y.best||0)-(x.best||0)||x.miss-y.miss;});
+    boardRows(rows.map(a=>{const s=H.st[a.p.id];return {name:a.p.name+(s.out?'（出局）':''),me:a.human,mark:(s.best?s.best.toFixed(2):'—')+(s.log[H.bar]?' '+s.log[H.bar]:'')};}));
+    let tb='';
+    if(ath.phase==='approach'&&H.t>H.T-1){const m=clamp((H.t-(H.T-1))/1,0,1),w=.3;tb='<div class="meter wide"><span>起跳时机</span><i class="tbar"><b class="zone" style="left:'+((.75-w*.35)*100)+'%;width:'+(w*.7*100)+'%"></b><u style="left:'+(m*100).toFixed(1)+'%"></u></i></div>';}
+    else if(ath.phase==='air'){const s=clamp(H.t/H.TA,0,1);tb='<div class="meter wide"><span>过杆挺髋</span><i class="tbar"><b class="zone" style="left:37.5%;width:25%"></b><u style="left:'+(s*100).toFixed(1)+'%"></u></i></div>';}
+    mtr.innerHTML='<div class="meter"><span>横杆</span><em>'+(H.bar?H.bar.toFixed(2):'—')+' m</em></div><div class="meter"><span>正在试跳</span><em>'+(H.curA?esc(H.curA.p.name):'')+'</em></div>'+tb;
+  }
+}
+
+/* ---------- athletics events ---------- */
+const GP_POINTS=[10,8,6,5,4,3,2,1];
+function athMeetFor(ids,label,onDone){return {evk:ev?ev.athEvent:settings.athEvent,gender:ev?ev.gender:settings.gender,ids,label,onDone};}
+function athCreateEvent(){
+  const g=settings.gender,evk=settings.athEvent,me=curPick().me,type=settings.mode;
+  const others=shuffle(ROSTER.athletics.filter(p=>p.g===g&&p.id!==me)).map(p=>p.id);
+  ev={kind:'ath',type,sport:'athletics',athEvent:evk,gender:g,done:false};
+  if(type==='league'){ev.ids=[me].concat(others.slice(0,7));ev.meets=[];ev.nMeets=4;}
+  else{const all=[me].concat(others.slice(0,15));ev.groups=[all.slice(0,8),all.slice(8,16)];ev.heats=[null,null];ev.finalIds=null;ev.final=null;ev.stage=0;}
+  saveEv();
+}
+function athGPStandings(){
+  const pts=Object.fromEntries(ev.ids.map(id=>[id,{id,pts:0,best:null,wins:0}]));
+  for(const m of ev.meets)m.forEach((r,i)=>{const s=pts[r.id];if(!r.dq&&r.mark!=null){s.pts+=GP_POINTS[i]||0;if(i===0)s.wins++;
+    const run=ATH_EVENTS[ev.athEvent].kind==='run';if(s.best==null||(run?r.mark<s.best:r.mark>s.best))s.best=r.mark;}});
+  return Object.values(pts).sort((a,b)=>b.pts-a.pts||b.wins-a.wins);
+}
+function athNextMeet(){
+  if(ev.type==='league'){
+    const k=ev.meets.length+1;
+    athStartMeet(athMeetFor(ev.ids,'大奖赛第 '+k+' 站',res=>{ev.meets.push(res.map(r=>({id:r.id,mark:r.mark,dq:r.dq||null})));if(ev.meets.length>=ev.nMeets)ev.done=true;saveEv();}));
+  }else if(ev.stage===0){
+    athStartMeet(athMeetFor(ev.groups[0],'预赛第 1 组',res=>{ev.heats[0]=res.map(r=>({id:r.id,mark:r.mark,dq:r.dq||null}));ev.heats[1]=simMeet(ev.groups[1],ev.athEvent);
+      ev.finalIds=ev.heats[0].slice(0,4).map(r=>r.id).concat(ev.heats[1].slice(0,4).map(r=>r.id));ev.stage=1;
+      if(!ev.finalIds.includes(ev.groups[0][0])){ev.final=null;}saveEv();}));
+  }else{
+    const ids=ev.finalIds.slice().sort((a,b)=>(b===ev.groups[0][0])-(a===ev.groups[0][0]));
+    athStartMeet(athMeetFor(ids,'决赛',res=>{ev.final=res.map(r=>({id:r.id,mark:r.mark,dq:r.dq||null}));ev.done=true;saveEv();}));
+  }
+}
+function athResRows(list){return '<div class="fixtures">'+list.map((r,i)=>'<div class="fx"><span class="'+(r.id===ev.myId?'me w':'')+'">'+(i+1)+'. '+esc(PEOPLE[r.id].name)+'</span><b></b><span>'+fmtMark(ev.athEvent,r)+'</span></div>').join('')+'</div>';}
+function athShowHub(){
+  game=null;ath=null;menuOpen=true;hideAll();$('hub').hidden=false;$('hub').scrollTop=0;
+  ev.myId=ev.type==='league'?ev.ids[0]:ev.groups[0][0];
+  const E=ATH_EVENTS[ev.athEvent];
+  $('hubEyebrow').textContent='田径 · '+(ev.gender==='M'?'男子':'女子')+E.name;
+  $('hubTitle').textContent=ev.type==='league'?'大奖赛':'预赛 + 决赛';
+  let html='';const nx=$('hubNext'),go=$('hubGo');
+  if(ev.type==='league'){
+    const st=athGPStandings();
+    html+='<div class="tblwrap"><table class="stand"><tr><th>#</th><th>选手</th><th>积分</th><th>冠军</th><th>最好成绩</th><th>评分</th></tr>'+st.map((s,k)=>'<tr class="'+(s.id===ev.myId?'me':'')+'"><td>'+(k+1)+'</td><td>'+esc(PEOPLE[s.id].name)+'</td><td>'+s.pts+'</td><td>'+s.wins+'</td><td>'+(s.best==null?'—':fmtMark(ev.athEvent,{mark:s.best}))+'</td><td>'+athOvr(PEOPLE[s.id],ev.athEvent)+'</td></tr>').join('')+'</table></div>';
+    if(ev.meets.length)html+='<div class="secttl">第 '+ev.meets.length+' 站结果（积分 10-8-6-5-4-3-2-1）</div>'+athResRows(ev.meets[ev.meets.length-1]);
+    if(ev.done){const st0=st[0];nx.innerHTML='<small>大奖赛结束</small><b>'+(st0.id===ev.myId?'你是总冠军！':'总冠军：'+esc(PEOPLE[st0.id].name))+'</b><small>你的总排名：第 '+(st.findIndex(s=>s.id===ev.myId)+1)+' 名</small>';go.textContent='新建赛事';go.onclick=()=>{ev=null;saveEv();openMenu();};}
+    else{nx.innerHTML='<small>第 '+(ev.meets.length+1)+' / '+ev.nMeets+' 站</small><b>'+E.name+' · 8 人同场</b><small>每站按名次积分，4 站后积分最高者夺冠</small>';go.textContent='开始比赛';go.onclick=athNextMeet;}
+  }else{
+    if(ev.heats[0])html+='<div class="secttl">预赛第 1 组（前 4 名晋级）</div>'+athResRows(ev.heats[0])+'<div class="secttl">预赛第 2 组（前 4 名晋级）</div>'+athResRows(ev.heats[1]);
+    else html+='<div class="secttl">预赛第 1 组</div><div class="fixtures">'+ev.groups[0].map(id=>'<div class="fx"><span class="'+(id===ev.myId?'me w':'')+'">'+esc(PEOPLE[id].name)+'</span><b></b><span>评分 '+athOvr(PEOPLE[id],ev.athEvent)+'</span></div>').join('')+'</div>';
+    if(ev.final)html+='<div class="secttl">决赛</div>'+athResRows(ev.final);
+    const inFinal=ev.finalIds&&ev.finalIds.includes(ev.myId);
+    if(ev.done){const w=ev.final[0];nx.innerHTML='<small>比赛结束</small><b>'+(w.id===ev.myId?'你是冠军！':'冠军：'+esc(PEOPLE[w.id].name)+' · '+fmtMark(ev.athEvent,w))+'</b>';go.textContent='新建赛事';go.onclick=()=>{ev=null;saveEv();openMenu();};}
+    else if(ev.stage===0){nx.innerHTML='<small>预赛 · 第 1 组</small><b>8 人比赛，前 4 名进决赛</b><small>另一组的成绩由系统模拟</small>';go.textContent='开始预赛';go.onclick=athNextMeet;}
+    else if(inFinal){nx.innerHTML='<small>你晋级了</small><b>决赛 · 8 人</b>';go.textContent='开始决赛';go.onclick=athNextMeet;}
+    else{nx.innerHTML='<small>预赛结束</small><b>你没有进入决赛</b><small>可以模拟决赛看看谁夺冠</small>';go.textContent='模拟决赛';go.onclick=()=>{ev.final=simMeet(ev.finalIds,ev.athEvent);ev.done=true;saveEv();athShowHub();};}
+  }
+  $('hubBody').innerHTML=html;
+  athPreview(ev.athEvent,ev.type==='league'?ev.ids:ev.groups[0]);
+}
+function athPreview(evk,ids){
+  const key='ath|'+evk+'|'+ids.join();if(previewSig===key)return;previewSig=key;
+  const list=athBuildWorld(evk,ids);athPrevFocus=athFocus(evk);
+  list.forEach((a,i)=>{
+    if(evk==='lj')placeAthlete(a,LJ.start+2+i*1.2,LJ.z+2+(i%2),1,0);
+    else if(evk==='hj')placeAthlete(a,HJ.x+5+i*.8,HJ.z+8,0,-1);
+    else{const lp=lanePos(evk==='400'?solveStart(TR.R1+i*TR.lw):100,TR.R1+(evk==='400'?i:i*.55)*TR.lw);placeAthlete(a,lp.x,lp.z,lp.dx,lp.dz);}
+  });
+  athPrevEnts=list;
+}
+let athPrevEnts=[];
+
 /* ---------------- input ---------------- */
 const isTouch=window.matchMedia('(pointer:coarse)').matches||('ontouchstart' in window&&navigator.maxTouchPoints>0);
 if(isTouch)document.documentElement.classList.add('touch');
-const keys={},stick={x:0,y:0};let touchB=false;
-function bHeld(){return keys.KeyK||keys.ShiftLeft||keys.ShiftRight||touchB;}
+const keys={},stick={x:0,y:0};let touchB=false,touchA=false,mouseA=false;
+function bHeld(){return keys.KeyK||keys.ShiftLeft||keys.ShiftRight||touchB||mouseB;}
 function input(){
   let x=0,z=0;
   if(keys.KeyA)x--;if(keys.KeyD)x++;if(keys.KeyW)z--;if(keys.KeyS)z++;
@@ -1184,16 +1697,17 @@ function input(){
 }
 function press(kind){
   ensureAudio();
+  if(ath){athPress(kind);return;}
   if(!game||menuOpen||!hero)return;
   if(game.phase==='serve'&&game.serverEnt===hero){startSwing(hero,kind);serve(hero,kind);return;}
   if((game.phase==='rally'||game.phase==='dead')&&hero.swingT<=.08)startSwing(hero,kind);
 }
 addEventListener('keydown',e=>{
-  if(menuOpen||!game)return;
+  if(menuOpen||(!game&&!ath))return;
   const k=e.code;
   if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k))e.preventDefault();
   if(k==='Escape'){$('menuBtn').click();return;}
-  if(k==='KeyV'&&!e.repeat){$('viewBtn').click();return;}
+  if(k==='KeyV'&&!e.repeat){if(!ath)$('viewBtn').click();return;}
   if(e.repeat)return;keys[k]=true;
   if(k==='KeyJ'||k==='Space')press('A');
   if(k==='KeyK'||k==='ShiftLeft'||k==='ShiftRight')press('B');
@@ -1208,7 +1722,9 @@ function aimAt(cx,cy){
   if(ray.ray.intersectPlane(aimPlane,hitPt)&&hitPt.z<0){aim.x=hitPt.x;aim.d=-hitPt.z/(cfg.L/2);clampAimPt();}
 }
 canvas.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.buttons)aimAt(e.clientX,e.clientY);});
-canvas.addEventListener('pointerdown',e=>{aimAt(e.clientX,e.clientY);if(e.pointerType==='mouse'&&game&&!menuOpen)press(e.button===2?'B':'A');});
+canvas.addEventListener('pointerdown',e=>{aimAt(e.clientX,e.clientY);if(e.pointerType==='mouse'&&(game||ath)&&!menuOpen){if(e.button===2){mouseB=true;}else mouseA=true;press(e.button===2?'B':'A');}});
+addEventListener('pointerup',e=>{if(e.pointerType==='mouse'){mouseA=false;mouseB=false;}});
+let mouseB=false;
 const zone=$('stickZone'),base=$('stickBase'),knob=$('stickKnob');let sid=null,ox=0,oy=0;
 function stickMove(e){let dx=e.clientX-ox,dy=e.clientY-oy;const R=base.offsetWidth*.43,m=Math.hypot(dx,dy);if(m>R){dx*=R/m;dy*=R/m;}knob.style.transform='translate('+dx+'px,'+dy+'px)';stick.x=dx/R;stick.y=dy/R;}
 zone.addEventListener('pointerdown',e=>{sid=e.pointerId;zone.setPointerCapture(sid);const zr=zone.getBoundingClientRect();base.style.left=(e.clientX-zr.left)+'px';base.style.top=(e.clientY-zr.top)+'px';base.style.bottom='auto';const hw=base.offsetWidth/2;base.style.margin=(-hw)+'px 0 0 '+(-hw)+'px';ox=e.clientX;oy=e.clientY;stickMove(e);ensureAudio();});
@@ -1217,8 +1733,8 @@ const stickEnd=e=>{if(e.pointerId!==sid)return;sid=null;stick.x=stick.y=0;knob.s
 zone.addEventListener('pointerup',stickEnd);zone.addEventListener('pointercancel',stickEnd);
 for(const [id,kind] of [['btnA','A'],['btnB','B']]){
   const b=$(id);
-  b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('down');if(kind==='B')touchB=true;press(kind);});
-  const up=()=>{b.classList.remove('down');if(kind==='B')touchB=false;};
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('down');if(kind==='B')touchB=true;else touchA=true;press(kind);});
+  const up=()=>{b.classList.remove('down');if(kind==='B')touchB=false;else touchA=false;};
   b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up);
 }
 document.addEventListener('contextmenu',e=>e.preventDefault());
@@ -1264,7 +1780,8 @@ let last=performance.now();
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(.05,(now-last)/1000);last=now;
-  if(menuOpen||!game)updatePreview(dt);
+  if(ath&&!menuOpen)athUpdate(dt);
+  else if(menuOpen||!game)updatePreview(dt);
   else{
     if(game.phase!=='over')updateGame(dt);
     updateVisuals(dt*cfg.timeScale);
